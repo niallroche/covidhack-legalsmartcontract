@@ -1,0 +1,134 @@
+/*
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+namespace org.accordproject.pandemicpolicy
+
+import org.accordproject.cicero.runtime.*
+import org.accordproject.time.*
+import org.accordproject.money.*
+
+contract PandemicPolicy over PandemicPolicyContract {
+  clause pandemicpolicyclause(request : PandemicPolicyRequest) : PandemicPolicyResponse emits PaymentObligation {
+    // Guard against calling pandemic clause invoked too early
+    let start = contract.insuranceStartDate;
+    enforce isBefore(start, now()) else
+    throw ErgoErrorResponse{ message : "Cannot exercise pandemic before insuranceStartDate date" };
+
+    // Guard against calling pandemic clause invoked too late
+    let finished = contract.insuranceEndDate;
+    enforce isBefore(now(), finished) else
+    throw ErgoErrorResponse{ message : "Cannot exercise pandemic after insuranceEndDate date" };
+
+    //TODO need to check and maintain the contract state to determine if the contract has been triggered before
+    //then compare the previous triggers to contract.maxNumberOfEvents
+    /*enforce state.invoked_count < contract.maxNumberOfEvents else
+    return PandemicPolicyResponse{
+      compensation: MonetaryAmount{ doubleValue: 0.0, currencyCode: "GBP" },
+      oracles: ""
+    };*/
+
+    //determine if there are pandemic related inputs from Oracles
+    let triggered_conditions : Integer = 0;
+    let oracle_inputs : String = "Oracles:";
+
+    //[number of cases] published by Public Health England (Oracle 1)
+    let oracle1triggered = (request.minCases >= contract.minCases) and (request.casesTimePeriod = contract.casesTimePeriod);
+    let triggered_conditions =
+      if oracle1triggered
+      then triggered_conditions+1
+      else triggered_conditions;
+    let oracle_inputs = oracle_inputs ++ " Oracle1-";
+    let oracle_inputs = oracle_inputs ++ toString(oracle1triggered);
+
+    //[legislation] published by UK Government (Oracle 2)
+    let oracle2triggered = request.restrictiveLegislationExists and (request.businessType = contract.businessType);
+    let triggered_conditions =
+      if oracle2triggered
+      then triggered_conditions+1
+      else triggered_conditions;
+    let oracle_inputs = oracle_inputs ++ " Oracle2-";
+    let oracle_inputs = oracle_inputs ++ toString(oracle2triggered);
+
+    //[whether pandemic exists] published by the World Health Organisation (Oracle 3)
+    let oracle3triggered = request.pandemicExists and (request.affectedRegion = contract.affectedRegion);
+    let triggered_conditions =
+      if oracle3triggered
+      then triggered_conditions+1
+      else triggered_conditions;
+    let oracle_inputs = oracle_inputs ++ " Oracle3-";
+    let oracle_inputs = oracle_inputs ++ toString(oracle3triggered);
+
+    //[number of deaths in hospitals] as published by NHS England (Oracle 4)
+    let oracle4triggered = (request.minDeaths >= contract.minDeaths) and (request.deathsTimePeriod = contract.deathsTimePeriod);
+    let triggered_conditions =
+      if oracle4triggered
+      then triggered_conditions+1
+      else triggered_conditions;
+    let oracle_inputs = oracle_inputs ++ " Oracle4-";
+    let oracle_inputs = oracle_inputs ++ toString(oracle4triggered);
+
+    //[pandemic alert rating] in [London] as published by Sage (Oracle 5)
+    let oracle5triggered = (request.pandemicAlertLevel > contract.pandemicAlertLevel) and (request.affectedRegion = contract.affectedRegion);
+    let triggered_conditions =
+      if oracle5triggered
+      then triggered_conditions+1
+      else triggered_conditions;
+    let oracle_inputs = oracle_inputs ++ " Oracle5-";
+    let oracle_inputs = oracle_inputs ++ toString(oracle5triggered);
+
+    let oracle_inputs = oracle_inputs ++ " triggered_conditions-";
+    let oracle_inputs = oracle_inputs ++ toString(triggered_conditions);
+
+    //determine of the required number of criteria are met to warrant a payout
+    //info(triggered_conditions)
+    enforce triggered_conditions >= contract.minTriggerParameters else
+    return PandemicPolicyResponse{
+      compensation: MonetaryAmount{ doubleValue: 0.0, currencyCode: contract.compensationAmount.currencyCode },
+      //compensation: MonetaryAmount{ doubleValue: 0.0, currencyCode: "GBP" },
+      oracles: oracle_inputs
+    };
+
+    //sufficient trigger conditions have been met
+    //determine if there was any cap applied to the contract either as a percentage or flat amount
+    //this could be related to the number of payouts if many are allowed per contract maxNumberOfEvents
+    //let capped = min([penalty, contract.capPercentage/100.0 * contract.compensationAmount]);
+    let capped = contract.compensationAmount.doubleValue;
+    //let capped = contract.compensationAmount;
+
+    //set a deadline as per the conditions of the contract, e.g. +30 days
+
+    emit PaymentObligation{
+			contract: contract,
+			promisor: some(contract.seller),
+			promisee: some(contract.buyer),
+			deadline: none,
+			amount: MonetaryAmount{ doubleValue: capped, currencyCode: "GBP" },
+			description: contract.seller.partyId ++ " should pay compensation amount to " ++ contract.buyer.partyId
+		};
+
+    /*
+    let invoked_count = state.invoked_count;
+    invoked_count+1;
+    set state PandemicPolicyState{
+      invoked_count:invoked_count
+    }*/
+
+    //TODO add AccordContractState state to output to record that the contract has been triggered
+    return PandemicPolicyResponse{
+      compensation: MonetaryAmount{ doubleValue: capped, currencyCode: contract.compensationAmount.currencyCode},
+      //compensation: MonetaryAmount{ doubleValue: capped, currencyCode: "GBP"},
+      oracles: oracle_inputs
+    }
+  }
+}

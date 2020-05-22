@@ -1,0 +1,168 @@
+namespace org.accordproject.pandemicpolicy
+
+import org.accordproject.cicero.contract.* from https://models.accordproject.org/cicero/contract.cto
+import org.accordproject.cicero.runtime.* from https://models.accordproject.org/cicero/runtime.cto
+import org.accordproject.time.* from https://models.accordproject.org/v2.0/time.cto
+import org.accordproject.address.PostalAddress from https://models.accordproject.org/address.cto
+import org.accordproject.money.MonetaryAmount from https://models.accordproject.org/money.cto
+
+/**
+ * Defines the data model for the LateDeliveryAndPenalty template.
+ * This defines the structure of the abstract syntax tree that the parser for the template
+ * must generate from input source text.
+ */
+asset PandemicPolicyContract extends AccordContract {
+  /**
+   * The buyer, or insured
+   */
+  o AccordParty buyer
+
+  /**
+   * The seller, or insurer
+   */
+  o AccordParty seller
+
+  /**
+   * The insurance policy identifier
+   */
+  o String policyNumber
+
+  /**
+  * The address of the insured property
+  */
+  /*o PostalAddress insuredAddress*/
+  o String insuredAddress
+
+  /**
+   * the agreed max compensation amount. This could be tied to the nature and duration of the events in more complex versions of a contract
+   */
+  o MonetaryAmount compensationAmount
+  /*o Double compensationAmount*/
+
+  /**
+   * the date that the insurance commences
+   */
+  o DateTime insuranceStartDate
+
+  /**
+   * the date the insurance concludes
+   */
+  o DateTime insuranceEndDate
+
+  /**
+   * The type if business, this may need to be a enum of options
+   */
+  o String businessType
+
+  /**
+   * The number of Oracle conditions that need to occur/agree to trigger a payout
+   */
+  o Integer minTriggerParameters
+
+  /**
+   * the number of confirmed cases returned from the Oracle as published by NHS England
+   * advanced versions could look at the infection rate per 10,000 in a particular region
+   */
+  o Integer minCases
+
+  /**
+   * the time period for the cases measurement (default supplied by the Oracle is one day)
+   */
+  /*o Duration casesTimePeriod*/
+  o Period casesTimePeriod
+
+  /**
+   * the UK region impacted by legislation and potentially by local cases and deaths, this should be an enum to match data from online sources
+   */
+  o String affectedRegion
+
+  /**
+   * the number of confirmed deaths returned from the Oracle as published by NHS England
+   */
+  o Integer minDeaths
+
+  /**
+   * the time period for the death measurement (default supplied by the Oracle is one month)
+   */
+  /*o Duration deathsTimePeriod*/
+  o Period deathsTimePeriod
+
+  /**
+   * the UK government alert level 1-5
+   * could use an enum, but since it is a simple linear scale then probably no need
+   */
+  o Integer pandemicAlertLevel
+}
+
+/**
+ * Defines the input data required by the pandemic policy, this contains inputs from multiple Oracles and sources
+ */
+transaction PandemicPolicyRequest extends Request {
+  /* Oracle 1 (cases) inputs */
+  /**
+   * the number of confirmed cases returned from the Oracle as published by NHS England
+   * advanced versions could look at the infection rate per 10,000 in a particular region
+   */
+  o Integer minCases
+
+  /**
+   * the time period for the cases measurement (default supplied by the Oracle is one day)
+   */
+  o Duration casesTimePeriod
+
+  /* Oracle 2 (legislation) inputs */
+  /**
+   * whether government legislation related to pandemic exists for the specific business and in a specified region
+   */
+  o Boolean restrictiveLegislationExists
+
+  /**
+   * The type if business impacted by the legislation, this may need to be a enum of options
+   */
+  o String businessType
+
+  /* Oracle 3 (pandemic exists) inputs */
+  /**
+   * whether a pandemic exists in a specified region
+   */
+  o Boolean pandemicExists
+
+  /**
+   * whether a pandemic exists in a specified region, this could be an enum or geographic region in more complex contracts
+   */
+  o String affectedRegion
+
+  /* Oracle 4 (death rate) inputs */
+  /**
+   * the number of confirmed deaths returned from the Oracle as published by NHS England
+   */
+  o Integer minDeaths
+
+  /**
+   * the time period for the death measurement (default supplied by the Oracle is one month)
+   */
+  o Duration deathsTimePeriod
+
+  /* Oracle 5 (alert level) inputs */
+  /**
+   * the UK government alert level 1-5, this may be regional too
+   * could use an enum, but since it is a simple linear scale then probably no need
+   */
+  o Integer pandemicAlertLevel
+
+}
+
+/**
+ * Defines the output data for the template
+ */
+transaction PandemicPolicyResponse extends Response {
+  /**
+   * The penalty to be paid by the seller
+   */
+  o MonetaryAmount compensation
+
+  /**
+   * The status of the oracle triggers
+   */
+  o String oracles
+}

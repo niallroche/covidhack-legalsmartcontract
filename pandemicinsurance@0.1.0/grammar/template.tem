@@ -1,0 +1,65 @@
+Pandemic Policy.
+----
+
+1.	Definitions
+The terms defined in this section, which are not otherwise defined, shall have the same meanings given to them throughout this Policy.
+
+1.1.	Compensation: means the specific amount of money detailed in the Schedule that You will receive after suffering a Measured Pandemic Event, subject to the terms and conditions of this Policy, regardless of the actual amount of loss or damage that You have suffered.
+
+1.2.	Pandemic: any case where there is a pandemic as confirmed by the World Health Organisation.
+
+1.3.	Pandemic Data Oracle: means the specific data sources identified in the Schedule.
+
+1.4.	Insured Period: means the period of time detailed in the Schedule
+
+1.5.	Insured Premises: means the property described in the Schedule.
+
+1.6.	Measured Pandemic Event: means a Pandemic, which must validly Trigger the Pandemic Data Oracle, during the Insured Period.
+
+2.	Insuring Clause
+2.1. We agree to pay You the specified amount of Compensation detailed in the Schedule if a Measured Pandemic Event occurs subject to the terms of this policy.
+
+2.2.	The cover provided under this Policy is specifically limited to that set out at clause 2.1. Any other loss or damage of whatever nature occurring at or to the Insured Premises or to the Insured Business is excluded from cover.
+
+3.	Limits
+3.1.	This Policy shall pay for only 2 Measured Pandemic Event(s) occurring during the Insured Period. There shall be no reinstatement of Policy limits.
+
+3.2.	The total amount payable by Us to You under this Policy, in total during the Insured Period, is therefore the amount of Compensation shown in the Schedule. The amount of Compensation You will receive was agreed by You
+
+4.	Claims Conditions Notification
+
+4.1.	When the Pandemic Data Oracle is triggered by a Pandemic We shall contact You within 24 hours in order to confirm that a Pandemic has taken place. You must respond to that message in the affirmative within 28 days, failing which We may have no liability to pay any Compensation under the Policy. WHY DON'T WE CHANGE THIS TO BE AUTOMATIC?
+
+4.2.	If a Pandemic  event occurs which You consider should have triggered the Pandemic Data Oracle but you have not heard from Us, then You shall notify Us within 28 days.
+
+Policy Schedule
+----
+Policy Number	[{policyNumber}]
+Compensation	[{compensationAmount}]
+
+Pandemic Data Oracles
+--
+The following agreed Oracle data sources:
+a)	[number of cases] published by Public Health England (Oracle 1)
+b)	[legislation] published by UK Government (Oracle 2)
+c)	[whether pandemic exists] published by the World Health Organisation (Oracle 3)
+d)	[total number of deaths] as published by NHS England (Oracle 4)
+e)	[pandemic alert rating] in [London] as published by Sage (Oracle 5)
+
+Insurer [{seller}]
+Insured Premises The building identified in Your Quote Document, at address [{insuredAddress}]
+Insured Period [{insuranceStartDate}] to [{insuranceEndDate}]
+Insured Business Name [{buyer}]
+Insured Business [{businessType}]
+
+Trigger	of payout of compensation due to a pandemic requires the satisfaction of at least [{minTriggerParameters}] of the trigger parameters
+
+Trigger Parameters
+--
+The trigger parameters are the following:
+
+a)	Oracle 1 records more than [{minCases}] cases per [{casesTimePeriod}]
+b)	Oracle 2 records that [{businessType}] must not open [at all]/[other than for takeaway]
+c)	Oracle 3 records that there is a pandemic in [{affectedRegion}]
+d)	Oracle 4 records more than [{minDeaths}] deaths per [{deathsTimePeriod}]
+e)	Oracle 5 records a rating of more than [{pandemicAlertLevel}]

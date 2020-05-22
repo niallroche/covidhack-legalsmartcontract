@@ -1,0 +1,21 @@
+{"$class":"org.accordproject.pandemicpolicy.PandemicPolicyRequest",
+  "minCases":100,
+  "casesTimePeriod":
+  {
+    "$class": "org.accordproject.time.Period",
+    "amount": 1,
+    "unit": "months"
+  },
+  "businessType":"restaurant",
+  "restrictiveLegislationExists":true,
+  "pandemicExists":true,
+  "affectedRegion":"England",
+  "minDeaths":1,
+  "deathsTimePeriod":
+  {
+    "$class": "org.accordproject.time.Period",
+    "amount": 1,
+    "unit": "days"
+  },
+  "pandemicAlertLevel":1
+}
